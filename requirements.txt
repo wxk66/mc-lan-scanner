@@ -1,0 +1,8 @@
+# 本项目运行时仅依赖 Python 标准库(含 tkinter), 无需安装任何第三方包。
+#
+# 下面的依赖仅在「自行打包 exe」时需要:
+#   pip install -r requirements.txt
+#
+# 普通使用(python mc_gui.py 或 python mc_scanner.py)不需要安装任何东西。
+
+pyinstaller>=6.0

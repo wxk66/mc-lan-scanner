@@ -1,0 +1,32 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.eggs/
+
+# PyInstaller 打包产物
+build/
+dist/
+*.spec
+
+# 扫描结果（示例输出，不入库）
+result.json
+result.txt
+*.log
+
+# 虚拟环境
+.venv/
+venv/
+env/
+
+# 编辑器 / IDE
+.vscode/
+.idea/
+*.swp
+
+# 系统
+.DS_Store
+Thumbs.db
+
+# Claude Code 本地配置
+.claude/
