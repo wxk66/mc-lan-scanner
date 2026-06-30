@@ -132,6 +132,42 @@ def make_signal_icon(parent, ms, bg):
     return cv
 
 
+class Tooltip:
+    """鼠标悬停在某个控件上时, 在旁边弹出一个小窗显示文本。
+
+    用于信号条: 悬停时显示该服务器的在线玩家列表。
+    """
+
+    def __init__(self, widget, text):
+        self.widget = widget
+        self.text = text
+        self.tip = None
+        widget.bind("<Enter>", self._show)
+        widget.bind("<Leave>", self._hide)
+        # 子控件(如 Canvas 上的图元)进出也会触发, 统一在控件层处理即可
+
+    def _show(self, event=None):
+        if self.tip is not None or not self.text:
+            return
+        # 计算弹窗位置: 控件右下方一点
+        x = self.widget.winfo_rootx() + px(12)
+        y = self.widget.winfo_rooty() + self.widget.winfo_height() + px(4)
+        self.tip = tk.Toplevel(self.widget)
+        self.tip.wm_overrideredirect(True)   # 去掉标题栏/边框
+        self.tip.wm_geometry("+%d+%d" % (x, y))
+        # 深色半透明风格的提示框
+        frame = tk.Frame(self.tip, bg="#1e293b", bd=0)
+        frame.pack()
+        tk.Label(frame, text=self.text, font=("Microsoft YaHei UI", 9),
+                 fg="#f1f5f9", bg="#1e293b", justify="left",
+                 padx=px(10), pady=px(6), wraplength=px(280)).pack()
+
+    def _hide(self, event=None):
+        if self.tip is not None:
+            self.tip.destroy()
+            self.tip = None
+
+
 MCAST_GRP = "224.0.2.60"
 MCAST_PORT = 4445
 
@@ -415,8 +451,19 @@ class ServerCard(tk.Frame):
         lat.pack(side="right", padx=(0, 12))
         icon = make_signal_icon(lat, latency, Theme.CARD_BG)
         icon.pack(side="left")
-        tk.Label(lat, text=lat_num, font=("Microsoft YaHei UI", 9, "bold"),
-                 fg=lat_color, bg=Theme.CARD_BG).pack(side="left", padx=(4, 0))
+        lat_label = tk.Label(lat, text=lat_num, font=("Microsoft YaHei UI", 9, "bold"),
+                 fg=lat_color, bg=Theme.CARD_BG)
+        lat_label.pack(side="left", padx=(4, 0))
+
+        # 鼠标悬停信号条 -> 显示在线玩家列表
+        players = info.get("players") or []
+        if players:
+            tip_text = "在线玩家 (%s/%s):\n" % (online, max_) + "\n".join(
+                "· " + p for p in players)
+        else:
+            tip_text = "在线玩家 (%s/%s):\n(无人在线或未提供玩家名单)" % (online, max_)
+        Tooltip(lat, tip_text)
+        Tooltip(icon, tip_text)
 
         # 玩家列表
         players = info.get("players") or []
